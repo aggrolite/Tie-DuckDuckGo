@@ -152,10 +152,8 @@ Tie::DuckDuckGo - Access DuckDuckGo search results via variables
   my %results;
   tie %results => 'Tie::DuckDuckGo';
 
-  for (qw( perl reddit cpan )) {
-    say $results{$_}->{url};
-    say $results{$_}->{url};
-  }
+  my $result = $results{reddit};
+  say $_->{url} for @$result;
 
 =head1 DESCRIPTION
 
