@@ -36,12 +36,17 @@
       },
       "runtime" : {
          "requires" : {
+            "Carp" : "0.0",
+            "HTML::TreeBuilder::XPath" : "0.0",
+            "HTTP::Tiny" : "0.0",
+            "URI" : "0.0",
             "perl" : "5.008005"
          }
       },
       "test" : {
          "requires" : {
-            "Test::More" : "0.96"
+            "Test::More" : "0.96",
+            "Test::RequiresInternet" : "0.02"
          }
       }
    },

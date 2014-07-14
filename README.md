@@ -6,8 +6,16 @@ Tie::DuckDuckGo - Access DuckDuckGo search results via variables
 
     use Tie::DuckDuckGo;
 
-    my @results;
+    # tie a scalar
+    my $search;
+    tie $search => 'Tie::DuckDuckGo' => 'perl';
 
+    say $search->{url};
+    say $search->{title};
+    say $search->{snippet};
+
+    # tie an array
+    my @results;
     tie @results => 'Tie::DuckDuckGo' => 'perl';
 
     for (@results) {
@@ -16,8 +24,8 @@ Tie::DuckDuckGo - Access DuckDuckGo search results via variables
       say $_->{snippet};
     }
 
+    # tie a hash
     my %results;
-
     tie %results => 'Tie::DuckDuckGo';
 
     for (qw( perl reddit cpan )) {
