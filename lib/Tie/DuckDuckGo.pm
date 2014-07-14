@@ -12,6 +12,7 @@ use HTML::TreeBuilder::XPath;
 use HTTP::Tiny;
 use Carp ();
 
+# when tying, call the constructor with data type name
 sub TIEARRAY  { shift->new('array',  @_) }
 sub TIEHASH   { shift->new('hash',   @_) }
 sub TIESCALAR { shift->new('scalar', @_) }
@@ -19,8 +20,11 @@ sub TIESCALAR { shift->new('scalar', @_) }
 sub new {
     my ($class, $type, $query) = @_;
 
+    # keep track of tied data type
     my $self = bless({type => $type}, $class);
 
+    # for now i'm using a key _tie_ddg,
+    # but maybe this can be simplified
     if ($type eq 'array') {
         $self->do_search('_tie_ddg', $query);
     }
@@ -28,6 +32,7 @@ sub new {
         $self->do_search($query, $query);
     }
     else {
+        ## $scalar = 1
         $self->do_search('_tie_ddg', $query, 1);
     }
 
@@ -38,12 +43,14 @@ sub do_search {
     my ($self, $store_as, $query, $scalar) = @_;
     return unless defined $query;
 
+    # do search
     my $uri = URI->new('https://duckduckgo.com/html/');
     $uri->query_form({ q => $query });
 
     my $resp = HTTP::Tiny->new->get($uri->as_string);
     my $tree = HTML::TreeBuilder::XPath->new_from_content($resp->{content});
 
+    # build results
     my @results = $tree->findnodes(
         './/div[@id="content"]//div[@id="links"]
           //div[@class =~ /\bresults_links\b/]
@@ -60,7 +67,7 @@ sub do_search {
             title => $link->as_text,
             snippet => $snippet,
           };
-        last if $scalar;
+        last if $scalar; # only save one result for scalar type
     }
 
     $self->{data}{$store_as} = $scalar ? [$save[0]] : \@save;
@@ -80,7 +87,6 @@ sub FETCH {
     $self->{data}{_tie_ddg}[$index];
 }
 
-# required
 sub FETCHSIZE {
     my $self = shift;
     scalar @{ $self->{data}{_tie_ddg} };
@@ -92,6 +98,7 @@ sub POP   { pop   @{shift->{data}{_tie_ddg}} }
 sub SPLICE {
     my ($self, $offset, $limit) = @_;
 
+    # oops, I don't think we want to write anything to the list
     if (@_ > 3) {
         Carp::carp q,Can't replace search results with list!,;
         return;
